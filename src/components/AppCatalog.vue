@@ -16,6 +16,9 @@
             :color="marker"
           />
         </div>
+        <h5 v-if="item.important" :class="$style.importantText">
+          Обязательный
+        </h5>
         <p :class="$style.itemDesc">{{ item.desc }}</p>
         <div :class="$style.actionButtons">
           <button :class="$style.actionButton" type="button">
@@ -44,6 +47,9 @@
             :color="childMarker"
           />
         </div>
+        <h5 v-if="childItem.important" :class="$style.importantText">
+          Обязательный
+        </h5>
         <p :class="$style.itemDesc">{{ childItem.desc }}</p>
         <div :class="$style.actionButtons">
           <button :class="$style.actionButton" type="button">
@@ -143,6 +149,14 @@ export default {
   & + & {
     margin-left: 6px;
   }
+}
+
+.importantText {
+  font-weight: 400;
+  font-size: 11px;
+  color: #ff238d;
+  margin: 0;
+  margin-left: 15px;
 }
 
 .itemDesc {
