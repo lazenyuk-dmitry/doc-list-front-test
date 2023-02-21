@@ -6,7 +6,11 @@ import AppIcon from "~components/AppIcon.vue";
   <button
     :class="[
       $style.btn,
-      { [$style.withIcon]: this.icon, [$style.onlyIcon]: this.isOnlyIcon },
+      {
+        [$style.withIcon]: this.icon,
+        [$style.onlyIcon]: this.isOnlyIcon,
+        [$style.transparent]: this.transparent,
+      },
     ]"
     type="button"
   >
@@ -27,6 +31,10 @@ export default {
       validator(value) {
         return Object.keys(ICONS).includes(value);
       },
+    },
+    transparent: {
+      type: Boolean,
+      defaultL: false,
     },
   },
   computed: {
@@ -79,6 +87,11 @@ export default {
   &:disabled {
     cursor: not-allowed;
     transition: 0.6s;
+  }
+
+  &.transparent {
+    background: none;
+    border: none;
   }
 }
 </style>

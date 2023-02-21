@@ -1,6 +1,7 @@
 <script setup>
 import AppCatalog from "~components/AppCatalog.vue";
 import TheHeader from "~components/TheHeader.vue";
+import AppSearchInput from "~components/AppSearchInput.vue";
 </script>
 
 <template>
@@ -8,7 +9,15 @@ import TheHeader from "~components/TheHeader.vue";
     <TheHeader />
 
     <div class="container">
+      <AppSearchInput :class="$style.searchInput" />
       <AppCatalog />
     </div>
   </main>
 </template>
+
+<style lang="scss" module>
+.searchInput {
+  max-width: 564px;
+  margin: 23px 0 15px 0;
+}
+</style>
