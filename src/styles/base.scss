@@ -1,0 +1,31 @@
+html {
+  font-family: 'Fira Sans', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.2;
+  color: $app-main-font-color;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+*, 
+*:before, 
+*:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}
+
+.container {
+  margin: auto;
+  padding: 0 $app-side-padding;
+}
+
+h1 {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 22px;
+}
