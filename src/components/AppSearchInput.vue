@@ -9,9 +9,9 @@ import AppButton from "~components/AppButton.vue";
     <input
       :class="$style.input"
       :value="modelValue"
-      @input="onInput($event)"
-      type="text"
       :placeholder="placeholder"
+      type="text"
+      @input="onInput($event)"
     />
     <AppButton
       v-if="modelValue"

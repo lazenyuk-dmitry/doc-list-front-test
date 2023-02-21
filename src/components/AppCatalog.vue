@@ -131,12 +131,14 @@ export default {
 
 .sectionBtn {
   margin-right: 14px;
+  flex-shrink: 0;
 }
 
 .itemTitle {
   font-weight: 500;
   font-size: 15px;
   margin: 0;
+  white-space: nowrap;
 }
 
 .markers {
@@ -165,6 +167,22 @@ export default {
   color: #8e9cbb;
   margin: 0;
   margin-left: 15px;
+  margin-right: 60px;
+  white-space: nowrap;
+  text-overflow: hidden;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(270deg, #ffffff 0%, rgba(255, 255, 255, 0) 50%);
+  }
 }
 
 .actionButtons {
