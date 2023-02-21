@@ -9,11 +9,21 @@ import AppSearchInput from "~components/AppSearchInput.vue";
     <TheHeader />
 
     <div class="container">
-      <AppSearchInput :class="$style.searchInput" />
+      <AppSearchInput :class="$style.searchInput" v-model="searchString" />
       <AppCatalog />
     </div>
   </main>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      searchString: "",
+    };
+  },
+};
+</script>
 
 <style lang="scss" module>
 .searchInput {
