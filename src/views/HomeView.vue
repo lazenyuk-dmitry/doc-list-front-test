@@ -7,6 +7,8 @@ import TheHeader from "~components/TheHeader.vue";
   <main>
     <TheHeader />
 
-    <AppCatalog />
+    <div class="container">
+      <AppCatalog />
+    </div>
   </main>
 </template>
