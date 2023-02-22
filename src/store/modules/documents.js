@@ -3,16 +3,21 @@ import DOCUMENTS from "~constants/document-list.js";
 export default {
   namespaced: true,
   state: () => ({
-    list: null,
+    sortedList: null,
+    unsortedList: null,
   }),
   getters: {
-    getDocuments(state) {
-      return state.list;
+    getSortedDocuments(state) {
+      return state.sortedList;
+    },
+    getUnsortedDocuments(state) {
+      return state.unsortedList;
     },
   },
   mutations: {
     setListSate(state, data) {
-      state.list = data;
+      state.sortedList = data.sorted;
+      state.unsortedList = data.unsorted;
     },
   },
   actions: {
