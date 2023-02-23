@@ -1,7 +1,5 @@
 <template>
-  <div
-    :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]"
-  >
+  <div :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]">
     <div :class="setSectionClass">
       <AppButton
         v-if="isCollapsed"

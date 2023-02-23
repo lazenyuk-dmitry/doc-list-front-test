@@ -3,8 +3,8 @@ import DOCUMENTS from "~constants/document-list.js";
 export default {
   namespaced: true,
   state: () => ({
-    sortedList: null,
-    unsortedList: null,
+    sortedList: [],
+    unsortedList: [],
   }),
   getters: {
     getSortedDocuments(state) {
