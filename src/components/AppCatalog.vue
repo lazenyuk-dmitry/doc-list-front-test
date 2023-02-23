@@ -1,57 +1,51 @@
 <template>
   <div :class="$style.root">
-    <draggable
-      :list="getSortedDocuments"
-      group="section"
-      item-key="id"
-      handle=".drag-handle"
-    >
-      <template #item="{ element }">
-        <AppCatalogItem
-          :data="element"
-          :isCollapsed="element.type === sectionType"
-        >
-          <template #nested>
-            <draggable
-              :list="element.child"
-              group="child"
-              item-key="id"
-              handle=".drag-handle"
-            >
-              <template #item="{ element }">
-                <AppCatalogItem :data="element" />
-              </template>
-            </draggable>
-          </template>
-        </AppCatalogItem>
-      </template>
-    </draggable>
-
-    <div :class="$style.unsorted">
-      <draggable
-        :list="getUnsortedDocuments"
-        group="child"
-        item-key="id"
-        handle=".drag-handle"
+    <div>
+      <AppCatalogItem
+        v-for="item in getSortedDocuments"
+        :key="item.id"
+        :data="item"
+        :isCollapsed="item.type === sectionType"
       >
-        <template #item="{ element }">
-          <AppCatalogItem :data="element" />
+        <template #nested>
+          <div>
+            <AppCatalogItem
+              v-for="nestedItem in item.child"
+              :key="nestedItem.id"
+              :data="nestedItem"
+            />
+          </div>
         </template>
-      </draggable>
+      </AppCatalogItem>
+    </div>
+
+    <div
+      :class="$style.unsorted"
+      :data-selector="getDropZoneDataSelector()"
+      @drop="onDrop($event, getUnsortedDocuments, this.groups.unsorted)"
+      @dragover.prevent
+      @dragenter.prevent
+    >
+      <AppCatalogItem
+        v-for="(item, index) in getUnsortedDocuments"
+        :key="item.id"
+        :data="item"
+        :data-index="index"
+        @dragstart="startDrag($event, item, this.groups.unsorted)"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import draggable from "vuedraggable";
 
 import AppCatalogItem from "~components/AppCatalogItem.vue";
 
 import { DOCUMENT_TYPE } from "~constants";
 
 export default {
-  components: { draggable, AppCatalogItem },
+  components: { AppCatalogItem },
   computed: {
     ...mapGetters("documents", ["getSortedDocuments", "getUnsortedDocuments"]),
   },
@@ -59,6 +53,9 @@ export default {
     return {
       sectionType: DOCUMENT_TYPE.SECTION,
       itemType: DOCUMENT_TYPE.ITEM,
+      groups: {
+        unsorted: "unsorted",
+      },
     };
   },
   mounted() {
@@ -66,6 +63,21 @@ export default {
   },
   methods: {
     ...mapActions("documents", ["fetchDocuments"]),
+    getDropZoneDataSelector() {
+      return this.$.uid;
+    },
+    getDropZoneDataSelectorJs() {
+      return `[data-selector="${this.getDropZoneDataSelector()}"]`;
+    },
+    getItemIndex(parent, child) {
+      return [...parent.children].indexOf(child);
+    },
+    getArrayByGroupName(groupName) {
+      switch (groupName) {
+        case this.groups.unsorted:
+          return this.getUnsortedDocuments;
+      }
+    },
     setSectionClass(type) {
       switch (type) {
         case this.sectionType:
@@ -74,10 +86,34 @@ export default {
           return this.$style.item;
       }
     },
-    getComponentData() {
-      return {
-        handle: ".my-handle",
-      };
+    startDrag(e, item, group) {
+      const target = e.target.closest("[data-index]");
+      const dropZone = target.closest(this.getDropZoneDataSelectorJs());
+      const itemIndex = target.dataset.index;
+
+      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("itemId", item.id);
+      e.dataTransfer.setData("group", group);
+      e.dataTransfer.setData("index", itemIndex);
+    },
+    onDrop(e, dropArray, dropZoneGroup) {
+      const target = e.target.closest("[data-index]");
+      const dropZone = target.closest(this.getDropZoneDataSelectorJs());
+      const newIndex = parseInt(target.dataset.index);
+      const itemId = parseInt(e.dataTransfer.getData("itemId"));
+      const itemGroup = e.dataTransfer.getData("group");
+      const oldIndex = parseInt(e.dataTransfer.getData("index"));
+      const oldArrayCopy = this.getArrayByGroupName(itemGroup);
+      const dropArrayCopy = dropArray;
+
+      console.log(newIndex, oldIndex, target);
+
+      if (dropZoneGroup === itemGroup) {
+        dropArrayCopy.splice(newIndex, 0, dropArrayCopy.splice(oldIndex, 1)[0]);
+
+        console.log(dropArrayCopy);
+      }
     },
   },
 };

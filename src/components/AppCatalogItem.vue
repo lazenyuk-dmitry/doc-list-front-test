@@ -1,5 +1,7 @@
 <template>
-  <div :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]">
+  <div
+    :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]"
+  >
     <div :class="setSectionClass">
       <AppButton
         v-if="isCollapsed"
@@ -24,7 +26,7 @@
         <button :class="$style.actionButton" type="button">
           <AppIcon icon="trash" />
         </button>
-        <button :class="$style.actionButton" class="drag-handle" type="button">
+        <button :class="$style.actionButton" type="button" draggable="true">
           <AppIcon icon="doubleVertArrow" />
         </button>
       </div>
@@ -55,6 +57,13 @@ export default {
   computed: {
     setSectionClass() {
       return this.isCollapsed ? this.$style.section : this.$style.item;
+    },
+  },
+  methods: {
+    startDrag(e, item) {
+      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("itemID", item.id);
     },
   },
 };
