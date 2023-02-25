@@ -4,7 +4,11 @@
       <template #item="{ item }">
         <AppCatalogItem :data="item" :isCollapsed="item.type === sectionType">
           <template #nested>
-            <AppDraggable :data="item.child" group="nested">
+            <AppDraggable
+              :data="item.child"
+              handle="[data-draggable]"
+              group="nested"
+            >
               <template #item="{ item }">
                 <AppCatalogItem :data="item" />
               </template>
@@ -15,7 +19,12 @@
     </AppDraggable>
 
     <div :class="$style.unsorted">
-      <AppDraggable :data="getUnsortedDocuments" group="nested">
+      <AppDraggable
+        :data="getUnsortedDocuments"
+        handle="[data-draggable]"
+        group="nested"
+        @end="endDrag($event)"
+      >
         <template #item="{ item }">
           <AppCatalogItem :data="item" />
         </template>
@@ -47,7 +56,12 @@ export default {
     this.fetchDocuments();
   },
   methods: {
-    ...mapActions("documents", ["fetchDocuments"]),
+    ...mapActions("documents", ["fetchDocuments", "updUnsortedDocs"]),
+    endDrag(data) {
+      console.log(data);
+
+      this.updUnsortedDocs(data);
+    },
   },
 };
 </script>

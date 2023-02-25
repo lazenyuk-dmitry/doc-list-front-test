@@ -24,7 +24,7 @@
         <button :class="$style.actionButton" type="button">
           <AppIcon icon="trash" />
         </button>
-        <button :class="$style.actionButton" type="button" draggable="true">
+        <button :class="$style.actionButton" type="button" data-draggable>
           <AppIcon icon="doubleVertArrow" />
         </button>
       </div>
