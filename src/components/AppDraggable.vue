@@ -17,9 +17,12 @@
 
 <script>
 import interact from "interactjs";
+import { toRaw } from "vue";
 import { mapActions, mapGetters } from "vuex";
 
+import EventBus from "~helpers/eventBus";
 import AppDraggableItem from "~components/AppDraggableItem.vue";
+import eventBus from "../helpers/eventBus";
 
 export default {
   components: { AppDraggableItem },
@@ -39,8 +42,10 @@ export default {
   },
   data() {
     return {
+      rawData: [],
       targetIndex: null,
       insertPosition: null,
+      zoneUid: this.$.uid,
       placeholder: document.createElement("hr"),
       minOffset: 0,
       maxOffset: 40,
@@ -55,19 +60,49 @@ export default {
     interact(this.getDropZoneEl).dropzone({
       listeners,
     });
+
+    eventBus.$on("data-changed", ({ data, zoneUid }) => {
+      if (this.zoneUid === zoneUid) {
+        console.log(this.zoneUid, zoneUid);
+        console.log("cha", data);
+
+        this.$emit("update:data", data);
+        this.$emit("end", data);
+      }
+    });
   },
   computed: {
     ...mapGetters("draggable", ["getOldArray", "getDraggableItem"]),
     getDropZoneEl() {
       return this.$refs.dropZone;
     },
-    rawData() {
-      return this.data;
+    newArrayCopy() {
+      return [...this.rawData];
+    },
+    oldArray() {
+      return this.getOldArray;
+    },
+  },
+  watch: {
+    data: {
+      handler(newValue) {
+        this.rawData = toRaw(newValue);
+      },
+      immediate: true,
+      deep: true,
     },
   },
   methods: {
-    ...mapActions("draggable", ["setOldArray", "setDraggableItem", "clear"]),
+    ...mapActions("draggable", [
+      "setOldArray",
+      "setDraggableItem",
+      "removeFromOldArray",
+      "clear",
+    ]),
     getDropZoneDataSelector() {
+      return this.$.uid;
+    },
+    getZoneUid() {
       return this.$.uid;
     },
     getDropZoneDataSelectorJs() {
@@ -90,8 +125,13 @@ export default {
       return 0;
     },
     dragStart(data) {
-      this.setDraggableItem(data);
-      this.setOldArray(this.rawData);
+      EventBus.$emit(
+        "set-data-transfer",
+        this.rawData,
+        data.data,
+        data.index,
+        this.zoneUid
+      );
     },
     move(event) {
       const target = event.target;
@@ -125,21 +165,17 @@ export default {
         }
       });
     },
-    drop(event) {
-      const oldArray = this.getOldArray;
-      const oldIndex = this.getDraggableItem.index;
-      const newIndex = this.getNewItemIndex();
-
-      if (oldIndex !== this.targetIndex) {
-        this.rawData.splice(newIndex, 0, oldArray.splice(oldIndex, 1)[0]);
-
-        this.$emit("update:data", this.rawData);
-        this.$emit("end", this.rawData);
-      }
+    async drop(event) {
+      eventBus.$emit(
+        "dropped",
+        this.rawData,
+        this.targetIndex,
+        this.insertPosition,
+        this.zoneUid
+      );
 
       this.clear();
       this.placeholder.remove();
-      this.draggableItemData = null;
     },
   },
 };

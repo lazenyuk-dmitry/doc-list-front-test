@@ -28,7 +28,7 @@ export default {
     },
     componentData() {
       return {
-         data: this.data,
+        data: this.data,
         index: this.index,
       };
     },

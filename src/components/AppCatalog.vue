@@ -1,13 +1,14 @@
 <template>
   <div :class="$style.root">
-    <AppDraggable :data="getSortedDocuments" group="sorted">
+    <AppDraggable v-model:data="sortedDocs" group="sorted">
       <template #item="{ item }">
         <AppCatalogItem :data="item" :isCollapsed="item.type === sectionType">
           <template #nested>
             <AppDraggable
-              :data="item.child"
+              v-model:data="item.child"
               handle="[data-draggable]"
               group="nested"
+              @end="updSortedDocs(sortedDocs)"
             >
               <template #item="{ item }">
                 <AppCatalogItem :data="item" />
@@ -20,10 +21,9 @@
 
     <div :class="$style.unsorted">
       <AppDraggable
-        :data="getUnsortedDocuments"
+        v-model:data="unsortedDocs"
         handle="[data-draggable]"
         group="nested"
-        @end="endDrag($event)"
       >
         <template #item="{ item }">
           <AppCatalogItem :data="item" />
@@ -45,6 +45,22 @@ export default {
   components: { AppCatalogItem, AppDraggable },
   computed: {
     ...mapGetters("documents", ["getSortedDocuments", "getUnsortedDocuments"]),
+    unsortedDocs: {
+      get() {
+        return this.getUnsortedDocuments;
+      },
+      set(data) {
+        this.updUnsortedDocs(data);
+      },
+    },
+    sortedDocs: {
+      get() {
+        return this.getSortedDocuments;
+      },
+      set(data) {
+        this.updSortedDocs(data);
+      },
+    },
   },
   data() {
     return {
@@ -56,12 +72,11 @@ export default {
     this.fetchDocuments();
   },
   methods: {
-    ...mapActions("documents", ["fetchDocuments", "updUnsortedDocs"]),
-    endDrag(data) {
-      console.log(data);
-
-      this.updUnsortedDocs(data);
-    },
+    ...mapActions("documents", [
+      "fetchDocuments",
+      "updUnsortedDocs",
+      "updSortedDocs",
+    ]),
   },
 };
 </script>

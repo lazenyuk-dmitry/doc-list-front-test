@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "interactjs": "^1.10.17",
+    "tiny-emitter": "^2.1.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
     "vuedraggable": "^4.1.0",
