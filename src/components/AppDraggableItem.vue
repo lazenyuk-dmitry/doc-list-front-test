@@ -1,6 +1,6 @@
 <template>
-  <div ref="item">
-    <slot name="item" :item="data" />
+  <div ref="item" :class="{ [$style.clone]: isDragged }">
+    <slot name="item" :item="data" :isDragged="isDragged" />
   </div>
 </template>
 
@@ -36,6 +36,7 @@ export default {
   data() {
     return {
       gost: null,
+      isDragged: false,
     };
   },
   mounted() {
@@ -56,6 +57,8 @@ export default {
       const target = event.target;
       this.gost = target.cloneNode(true);
 
+      this.gost.classList.add(this.$style.gost);
+
       this.gost.style.position = "absolute";
       this.gost.style.width = event.rect.width + "px";
       this.gost.style.height = event.rect.height + "px";
@@ -63,6 +66,8 @@ export default {
       this.gost.style.left = event.rect.left + "px";
 
       document.body.appendChild(this.gost);
+
+      this.isDragged = true;
 
       this.$emit("start", this.componentData);
     },
@@ -78,8 +83,20 @@ export default {
         this.gost = null;
       }
 
+      this.isDragged = false;
+
       this.$emit("end", this.componentData);
     },
   },
 };
 </script>
+
+<style lang="scss" module>
+.gost {
+  box-shadow: 0px 3px 16px rgba(0, 102, 255, 0.7);
+}
+
+.clone {
+  opacity: 0.2;
+}
+</style>

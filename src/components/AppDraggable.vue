@@ -18,7 +18,6 @@
 <script>
 import interact from "interactjs";
 import { toRaw } from "vue";
-import { mapActions, mapGetters } from "vuex";
 
 import EventBus from "~helpers/eventBus";
 import AppDraggableItem from "~components/AppDraggableItem.vue";
@@ -55,24 +54,25 @@ export default {
     const listeners = {
       drop: this.drop,
       move: this.move,
+      dragleave: this.dragleave,
     };
 
-    interact(this.getDropZoneEl).dropzone({
+    this.placeholder.classList.add(this.$style.placeholder);
+
+    const a = interact(this.getDropZoneEl).dropzone({
+      // overlap: 0.9,
       listeners,
+      // checker: this.checker,
     });
 
     eventBus.$on("data-changed", ({ data, zoneUid }) => {
       if (this.zoneUid === zoneUid) {
-        console.log(this.zoneUid, zoneUid);
-        console.log("cha", data);
-
         this.$emit("update:data", data);
         this.$emit("end", data);
       }
     });
   },
   computed: {
-    ...mapGetters("draggable", ["getOldArray", "getDraggableItem"]),
     getDropZoneEl() {
       return this.$refs.dropZone;
     },
@@ -93,36 +93,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions("draggable", [
-      "setOldArray",
-      "setDraggableItem",
-      "removeFromOldArray",
-      "clear",
-    ]),
-    getDropZoneDataSelector() {
-      return this.$.uid;
-    },
-    getZoneUid() {
-      return this.$.uid;
-    },
-    getDropZoneDataSelectorJs() {
-      return `[data-selector="${this.getDropZoneDataSelector()}"]`;
-    },
-    getItemIndex(parent, child) {
-      return [...parent.children].indexOf(child);
-    },
-    getNewItemIndex() {
-      const oldIndex = this.getDraggableItem.index;
-      const calcPosition =
-        this.targetIndex > oldIndex ? this.targetIndex - 1 : this.targetIndex;
-
-      if (this.insertPosition === "before") {
-        return calcPosition;
-      } else if (this.insertPosition === "after") {
-        return calcPosition + 1;
-      }
-
-      return 0;
+    intersect(a, b) {
+      return (
+        a.left <= b.right &&
+        b.left <= a.right &&
+        a.top <= b.bottom &&
+        b.top <= a.bottom
+      );
     },
     dragStart(data) {
       EventBus.$emit(
@@ -130,7 +107,8 @@ export default {
         this.rawData,
         data.data,
         data.index,
-        this.zoneUid
+        this.zoneUid,
+        this.group
       );
     },
     move(event) {
@@ -165,18 +143,45 @@ export default {
         }
       });
     },
-    async drop(event) {
+    drop(e) {
       eventBus.$emit(
         "dropped",
         this.rawData,
         this.targetIndex,
         this.insertPosition,
-        this.zoneUid
+        this.zoneUid,
+        this.group
       );
 
-      this.clear();
       this.placeholder.remove();
+    },
+    dragleave() {
+      this.placeholder.remove();
+    },
+    checker(
+      dragEvent, // related dragmove or dragend event
+      event, // TouchEvent/PointerEvent/MouseEvent
+      dropped, // bool result of the default checker
+      dropzone, // dropzone Interactable
+      dropElement, // dropzone elemnt
+      draggable, // draggable Interactable
+      draggableElement
+    ) {
+      const draggableRect = draggableElement.getBoundingClientRect();
+      const zoneRect = this.getDropZoneEl.getBoundingClientRect();
+
+      console.log(this.intersect(draggableRect, zoneRect));
+
+      return this.intersect(draggableRect, zoneRect);
     },
   },
 };
 </script>
+
+<style lang="scss" module>
+.placeholder {
+  height: 5px;
+  background: #0066ff;
+  margin: 0;
+}
+</style>

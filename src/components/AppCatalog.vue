@@ -1,6 +1,10 @@
 <template>
   <div :class="$style.root">
-    <AppDraggable v-model:data="sortedDocs" group="sorted">
+    <AppDraggable
+      v-model:data="sortedDocs"
+      handle="[data-draggable]"
+      group="sorted"
+    >
       <template #item="{ item }">
         <AppCatalogItem :data="item" :isCollapsed="item.type === sectionType">
           <template #nested>

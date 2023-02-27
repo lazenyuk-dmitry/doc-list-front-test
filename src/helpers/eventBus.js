@@ -5,6 +5,7 @@ const dataTransfer = {
   item: null,
   index: null,
   zoneUid: null,
+  group: null,
 };
 
 function addItem(array, item, index) {
@@ -40,15 +41,20 @@ function emitChangedData(data, zoneUid) {
   });
 }
 
-emitter.on("set-data-transfer", (originArray, item, index, zoneUid) => {
+emitter.on("set-data-transfer", (originArray, item, index, zoneUid, group) => {
   dataTransfer.originArray = originArray;
   dataTransfer.zoneUid = zoneUid;
   dataTransfer.item = item;
   dataTransfer.index = index;
+  dataTransfer.group = group;
 });
 
-emitter.on("dropped", (array, index, insertPosition, zoneUid) => {
+emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
   const newPosition = getNewItemIndex(index, insertPosition);
+
+  if (dataTransfer.group !== group) {
+    return;
+  }
 
   if (index === dataTransfer.index && zoneUid === dataTransfer.zoneUid) {
     return;
