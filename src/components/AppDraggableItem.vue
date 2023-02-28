@@ -1,11 +1,16 @@
 <template>
-  <div ref="item" :class="{ [$style.clone]: isDragged }">
+  <div
+    ref="item"
+    :class="{ [$style.clone]: isDragged }"
+    :data-draggable-item="itemUid"
+  >
     <slot name="item" :item="data" :isDragged="isDragged" />
   </div>
 </template>
 
 <script>
 import interact from "interactjs";
+import EventBus from "~helpers/eventBus";
 
 export default {
   props: {
@@ -36,10 +41,13 @@ export default {
         index: this.index,
       };
     },
+    itemUid() {
+      return this.$.uid;
+    },
   },
   data() {
     return {
-      gost: null,
+      ghost: null,
       isDragged: false,
     };
   },
@@ -55,37 +63,43 @@ export default {
       allowFrom: this.allowFrom,
       listeners,
     });
+
+    EventBus.$on("overlap", (itemUid) => {
+      if (itemUid === this.itemUid) {
+        this.$emit("overlap", this);
+      }
+    });
   },
   methods: {
     start(event) {
       const target = event.target;
-      this.gost = target.cloneNode(true);
+      this.ghost = target.cloneNode(true);
 
-      this.gost.classList.add(this.$style.gost);
-      this.gost.setAttribute("data-ghost", this.group);
+      this.ghost.classList.add(this.$style.ghost);
+      this.ghost.setAttribute("data-ghost", this.group);
 
-      this.gost.style.position = "absolute";
-      this.gost.style.width = event.rect.width + "px";
-      this.gost.style.height = event.rect.height + "px";
-      this.gost.style.top = event.rect.top + "px";
-      this.gost.style.left = event.rect.left + "px";
+      this.ghost.style.position = "absolute";
+      this.ghost.style.width = event.rect.width + "px";
+      this.ghost.style.height = event.rect.height + "px";
+      this.ghost.style.top = event.rect.top + "px";
+      this.ghost.style.left = event.rect.left + "px";
 
-      document.body.appendChild(this.gost);
+      document.body.appendChild(this.ghost);
 
       this.isDragged = true;
 
       this.$emit("start", this.componentData);
     },
     move(event) {
-      if (this.gost) {
-        this.gost.style.top = event.rect.top + "px";
-        this.gost.style.left = event.rect.left + "px";
+      if (this.ghost) {
+        this.ghost.style.top = event.rect.top + "px";
+        this.ghost.style.left = event.rect.left + "px";
       }
     },
-    end(event) {
-      if (this.gost) {
-        this.gost.remove();
-        this.gost = null;
+    end() {
+      if (this.ghost) {
+        this.ghost.remove();
+        this.ghost = null;
       }
 
       this.isDragged = false;
@@ -97,7 +111,7 @@ export default {
 </script>
 
 <style lang="scss" module>
-.gost {
+.ghost {
   box-shadow: 0px 3px 16px rgba(0, 102, 255, 0.7);
 }
 

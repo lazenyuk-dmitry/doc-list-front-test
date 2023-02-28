@@ -1,5 +1,5 @@
 <template>
-  <div ref="dropZone">
+  <div ref="dropZone" :data-drag-zone="zoneUid" :data-group="group">
     <AppDraggableItem
       v-for="(item, index) in rawData"
       :key="item.id"
@@ -17,10 +17,12 @@
 </template>
 
 <script>
+// import { to } from "vue";
 import interact from "interactjs";
 import { toRaw } from "vue";
 
 import EventBus from "~helpers/eventBus";
+import { intersectRect } from "~helpers";
 import AppDraggableItem from "~components/AppDraggableItem.vue";
 import eventBus from "../helpers/eventBus";
 
@@ -66,16 +68,25 @@ export default {
       checker: this.checker,
     });
 
-    eventBus.$on("data-changed", ({ data, zoneUid }) => {
+    EventBus.$on("data-changed", ({ data, zoneUid }) => {
       if (this.zoneUid === zoneUid) {
         this.$emit("update:data", data);
         this.$emit("end", data);
+      }
+    });
+
+    EventBus.$on("dropped-on-child", (zoneUid) => {
+      if (this.zoneUid === zoneUid) {
+        this.emitDroppedEvent();
       }
     });
   },
   computed: {
     getDropZoneEl() {
       return this.$refs.dropZone;
+    },
+    getItemComponent() {
+      return this.$refs.itemComponent;
     },
     newArrayCopy() {
       return [...this.rawData];
@@ -94,12 +105,14 @@ export default {
     },
   },
   methods: {
-    intersect(a, b) {
-      return (
-        a.left <= b.right &&
-        b.left <= a.right &&
-        a.top <= b.bottom &&
-        b.top <= a.bottom
+    emitDroppedEvent() {
+      EventBus.$emit(
+        "dropped",
+        this.rawData,
+        this.targetIndex,
+        this.insertPosition,
+        this.zoneUid,
+        this.group
       );
     },
     dragStart(data) {
@@ -116,17 +129,36 @@ export default {
       const target = event.target;
       const dragEvent = event.dragEvent;
       const dragItemRect = dragEvent.rect;
+      const ghostEl = document.querySelector("[data-ghost]");
+      const ghostGroup = ghostEl.getAttribute("data-ghost");
+      const ghostRect = ghostEl.getBoundingClientRect();
+
+      this.placeholder.remove();
 
       const zoneChild = [...target.children].filter(
         (item) => item !== this.placeholder
       );
 
-      this.placeholder.remove();
-
       zoneChild.forEach((item, index) => {
         const itemRect = item.getBoundingClientRect();
         const topOffset = dragItemRect.top - itemRect.top;
         const bottomOffset = itemRect.bottom - dragItemRect.bottom;
+        const childDragZoneEl = item.querySelector("[data-drag-zone]");
+        const childZoneGroup = childDragZoneEl
+          ? childDragZoneEl.getAttribute("data-group")
+          : null;
+
+        if (
+          childZoneGroup !== this.group &&
+          childDragZoneEl &&
+          intersectRect(ghostRect, itemRect)
+        ) {
+          this.targetIndex = index;
+          this.insertPosition = "before";
+          childDragZoneEl.append(this.placeholder);
+
+          return;
+        }
 
         if (topOffset < this.maxOffset && topOffset > this.minOffset) {
           this.targetIndex = index;
@@ -144,15 +176,39 @@ export default {
         }
       });
     },
-    drop(e) {
-      eventBus.$emit(
-        "dropped",
-        this.rawData,
-        this.targetIndex,
-        this.insertPosition,
-        this.zoneUid,
-        this.group
-      );
+    drop(event) {
+      const target = event.target;
+      const ghostEl = document.querySelector("[data-ghost]");
+      const ghostGroup = ghostEl.getAttribute("data-ghost");
+      const ghostRect = ghostEl.getBoundingClientRect();
+
+      if (ghostGroup !== this.group) {
+        [...target.children]
+          .filter((item) => item !== this.placeholder)
+          .forEach((item, index) => {
+            const itemRect = item.getBoundingClientRect();
+            const childDragZoneEl = item.querySelector("[data-drag-zone]");
+            const childZoneGroup = childDragZoneEl
+              ? childDragZoneEl.getAttribute("data-group")
+              : null;
+
+            if (!childDragZoneEl && childZoneGroup !== this.group) {
+              return;
+            }
+
+            const childZoneUid = parseInt(
+              childDragZoneEl.getAttribute("data-drag-zone")
+            );
+
+            if (intersectRect(ghostRect, itemRect)) {
+              EventBus.$emit("dropped-on-child", childZoneUid);
+
+              return;
+            }
+          });
+      }
+
+      this.emitDroppedEvent();
 
       this.placeholder.remove();
     },
@@ -164,8 +220,16 @@ export default {
       const ghostGroup = ghostEl.getAttribute("data-ghost");
       const ghostRect = ghostEl.getBoundingClientRect();
       const zoneRect = this.getDropZoneEl.getBoundingClientRect();
+      const childDragZoneEl =
+        this.getDropZoneEl.querySelector("[data-drag-zone]");
+      const childZoneGroup = childDragZoneEl
+        ? childDragZoneEl.getAttribute("data-group")
+        : null;
 
-      return ghostGroup === this.group && this.intersect(ghostRect, zoneRect);
+      return (
+        (ghostGroup === this.group || ghostGroup === childZoneGroup) &&
+        intersectRect(ghostRect, zoneRect)
+      );
     },
   },
 };
