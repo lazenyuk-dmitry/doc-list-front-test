@@ -17,14 +17,12 @@
 </template>
 
 <script>
-// import { to } from "vue";
 import interact from "interactjs";
 import { toRaw } from "vue";
 
 import EventBus from "~helpers/eventBus";
 import { intersectRect } from "~helpers";
 import AppDraggableItem from "~components/AppDraggableItem.vue";
-import eventBus from "../helpers/eventBus";
 
 export default {
   components: { AppDraggableItem },

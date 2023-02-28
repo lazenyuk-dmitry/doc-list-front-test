@@ -69,11 +69,7 @@ emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
     );
   } else {
     emitChangedData(
-      removeItem(
-        dataTransfer.originArray,
-        dataTransfer.item,
-        dataTransfer.index
-      ),
+      removeItem(dataTransfer.originArray, dataTransfer.index),
       dataTransfer.zoneUid
     );
     emitChangedData(addItem(array, dataTransfer.item, newPosition), zoneUid);
