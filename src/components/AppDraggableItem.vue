@@ -21,6 +21,10 @@ export default {
       type: String || HTMLElement,
       default: "*",
     },
+    group: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     gerDraggableEl() {
@@ -58,6 +62,7 @@ export default {
       this.gost = target.cloneNode(true);
 
       this.gost.classList.add(this.$style.gost);
+      this.gost.setAttribute("data-ghost", this.group);
 
       this.gost.style.position = "absolute";
       this.gost.style.width = event.rect.width + "px";

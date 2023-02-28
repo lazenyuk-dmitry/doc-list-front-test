@@ -6,6 +6,7 @@
       :data="item"
       :index="index"
       :allowFrom="handle"
+      :group="group"
       @start="dragStart($event)"
     >
       <template #item="{ item }">
@@ -32,7 +33,7 @@ export default {
     },
     group: {
       type: String,
-      required: false,
+      required: true,
     },
     handle: {
       type: String || HTMLElement,
@@ -60,9 +61,9 @@ export default {
     this.placeholder.classList.add(this.$style.placeholder);
 
     const a = interact(this.getDropZoneEl).dropzone({
-      // overlap: 0.9,
+      overlap: 0.8,
       listeners,
-      // checker: this.checker,
+      checker: this.checker,
     });
 
     eventBus.$on("data-changed", ({ data, zoneUid }) => {
@@ -158,21 +159,13 @@ export default {
     dragleave() {
       this.placeholder.remove();
     },
-    checker(
-      dragEvent, // related dragmove or dragend event
-      event, // TouchEvent/PointerEvent/MouseEvent
-      dropped, // bool result of the default checker
-      dropzone, // dropzone Interactable
-      dropElement, // dropzone elemnt
-      draggable, // draggable Interactable
-      draggableElement
-    ) {
-      const draggableRect = draggableElement.getBoundingClientRect();
+    checker() {
+      const ghostEl = document.querySelector("[data-ghost]");
+      const ghostGroup = ghostEl.getAttribute("data-ghost");
+      const ghostRect = ghostEl.getBoundingClientRect();
       const zoneRect = this.getDropZoneEl.getBoundingClientRect();
 
-      console.log(this.intersect(draggableRect, zoneRect));
-
-      return this.intersect(draggableRect, zoneRect);
+      return ghostGroup === this.group && this.intersect(ghostRect, zoneRect);
     },
   },
 };
