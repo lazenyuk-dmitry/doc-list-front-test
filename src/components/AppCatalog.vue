@@ -5,8 +5,12 @@
       handle="[data-draggable]"
       group="sorted"
     >
-      <template #item="{ item }">
-        <AppCatalogItem :data="item" :isCollapsed="item.type === sectionType">
+      <template #item="{ item, uid }">
+        <AppCatalogItem
+          :data="item"
+          :isCollapsed="item.type === sectionType"
+          :dragItemUid="uid"
+        >
           <template #nested>
             <AppDraggable
               v-model:data="item.child"

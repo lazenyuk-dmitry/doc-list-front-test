@@ -4,7 +4,7 @@
     :class="{ [$style.clone]: isDragged }"
     :data-draggable-item="itemUid"
   >
-    <slot name="item" :item="data" :isDragged="isDragged" />
+    <slot name="item" :item="data" :uid="itemUid" />
   </div>
 </template>
 

@@ -3,8 +3,9 @@
     <div :class="setSectionClass">
       <AppButton
         v-if="isCollapsed"
-        :class="$style.sectionBtn"
+        :class="[$style.sectionBtn, { [$style.collapse]: isCollapse }]"
         icon="chevronTo"
+        @click="toggleCollapse"
       />
       <h3 :class="$style.itemTitle">{{ data.title }}</h3>
       <div v-if="data.marker.length" :class="$style.markers">
@@ -24,18 +25,30 @@
         <button :class="$style.actionButton" type="button">
           <AppIcon icon="trash" />
         </button>
-        <button :class="$style.actionButton" type="button" data-draggable>
-          <AppIcon icon="doubleVertArrow" />
+        <button
+          :class="$style.actionButton"
+          type="button"
+          data-draggable
+          @mousedown="isDragged = true"
+          @mouseout="isDragged = false"
+          @mouseup="isDragged = false"
+        >
+          <AppIcon v-if="isDragged" icon="doubleVertArrowBlue" />
+          <AppIcon v-else icon="doubleVertArrow" />
         </button>
       </div>
     </div>
-    <div :class="$style.nestedItemsContainer">
+    <div
+      ref="collapsed"
+      :class="[$style.nestedItemsContainer, { [$style.collapse]: isCollapse }]"
+    >
       <slot name="nested" />
     </div>
   </div>
 </template>
 
 <script>
+import EventBus from "~helpers/eventBus";
 import AppButton from "~components/AppButton.vue";
 import AppDocMarker from "~components/AppDocMarker.vue";
 import AppIcon from "~components/AppIcon.vue";
@@ -51,17 +64,81 @@ export default {
       type: Boolean,
       default: false,
     },
+    dragItemUid: {
+      type: Number,
+      required: false,
+    },
+  },
+  data() {
+    return {
+      animationId: null,
+      isDragged: false,
+      isCollapse: true,
+      collapseStep: 20,
+    };
   },
   computed: {
     setSectionClass() {
       return this.isCollapsed ? this.$style.section : this.$style.item;
     },
   },
+  mounted() {
+    EventBus.$on("item-changed", (itemId) => {
+      console.log(itemId, this.dragItemUid);
+    });
+  },
   methods: {
-    startDrag(e, item) {
-      e.dataTransfer.dropEffect = "move";
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("itemID", item.id);
+    collapseDown(collapsedEl) {
+      const maxHeight = collapsedEl.style.maxHeight
+        ? parseInt(collapsedEl.style.maxHeight)
+        : 0;
+
+      if (maxHeight > 0) {
+        collapsedEl.style.maxHeight = `${maxHeight - this.collapseStep}px`;
+        this.animationId = requestAnimationFrame(
+          this.collapseDown.bind(null, collapsedEl)
+        );
+      } else {
+        collapsedEl.style.display = "none";
+      }
+    },
+    collapseUp(collapsedEl, targetHeight) {
+      const maxHeight = collapsedEl.style.maxHeight
+        ? parseInt(collapsedEl.style.maxHeight)
+        : 0;
+
+      if (maxHeight < targetHeight) {
+        collapsedEl.style.maxHeight = `${maxHeight + this.collapseStep}px`;
+        this.animationId = requestAnimationFrame(
+          this.collapseUp.bind(null, collapsedEl, targetHeight)
+        );
+      }
+    },
+    toggleCollapse() {
+      const collapsedEl = this.$refs.collapsed;
+
+      collapsedEl.style.display = "block";
+
+      const targetHeight = collapsedEl.scrollHeight;
+      const maxHeight = collapsedEl.style.maxHeight
+        ? parseInt(collapsedEl.style.maxHeight)
+        : 0;
+
+      cancelAnimationFrame(this.animationId);
+
+      if (maxHeight) {
+        this.animationId = requestAnimationFrame(
+          this.collapseDown.bind(null, collapsedEl, targetHeight)
+        );
+
+        this.isCollapse = true;
+      } else {
+        this.animationId = requestAnimationFrame(
+          this.collapseUp.bind(null, collapsedEl, targetHeight)
+        );
+
+        this.isCollapse = false;
+      }
     },
   },
 };
@@ -90,6 +167,12 @@ export default {
 .sectionBtn {
   margin-right: 14px;
   flex-shrink: 0;
+  transition: 0.2s ease-out;
+
+  &.collapse {
+    transform: rotate(180deg);
+    transition: 0.2s ease-out;
+  }
 }
 
 .itemTitle {
@@ -179,5 +262,7 @@ export default {
 
 .nestedItemsContainer {
   padding-left: 16px;
+  max-height: 0;
+  overflow: hidden;
 }
 </style>
