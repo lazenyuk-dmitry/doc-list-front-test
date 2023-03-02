@@ -42,6 +42,7 @@ export default {
   },
   data() {
     return {
+      debounceTimer: null,
       rawData: [],
       targetIndex: null,
       insertPosition: null,
@@ -80,9 +81,9 @@ export default {
       }
     });
 
-    EventBus.$on("dropped-on-child", (zoneUid) => {
+    EventBus.$on("dropped-on-child", (targetIndex, insertPosition, zoneUid) => {
       if (this.zoneUid === zoneUid) {
-        this.emitDroppedEvent();
+        this.emitDroppedEvent(targetIndex, insertPosition);
       }
     });
   },
@@ -92,9 +93,6 @@ export default {
     },
     getItemComponent() {
       return this.$refs.itemComponent;
-    },
-    newArrayCopy() {
-      return [...this.rawData];
     },
     oldArray() {
       return this.getOldArray;
@@ -195,12 +193,15 @@ export default {
 
       EventBus.$emit(eventName, itemUid);
     },
-    emitDroppedEvent() {
+    emitDroppedEvent(
+      targetIndex = this.targetIndex,
+      insertPosition = this.insertPosition
+    ) {
       EventBus.$emit(
         "dropped",
         this.rawData,
-        this.targetIndex,
-        this.insertPosition,
+        targetIndex,
+        insertPosition,
         this.zoneUid,
         this.group
       );
@@ -215,11 +216,16 @@ export default {
         this.group
       );
     },
-    move(event) {
-      const target = event.target;
-
+    insertPlaceholder(target) {
+      const allPlaceholders = document.querySelector(
+        "." + this.placeholder.className
+      );
       const { insertPosition, dragZoneEl, targetEl } =
         this.calcPosition(target);
+
+      if (allPlaceholders) {
+        allPlaceholders.remove();
+      }
 
       switch (insertPosition) {
         case "append":
@@ -241,6 +247,14 @@ export default {
 
       this.emitItemEvent("drag-move", targetEl);
     },
+    move(event) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        const target = event.target;
+
+        this.insertPlaceholder(target);
+      }, 100);
+    },
     drop(event) {
       const target = event.target;
       const { targetIndex, targetEl, insertPosition, childZoneUid } =
@@ -250,7 +264,12 @@ export default {
       this.insertPosition = insertPosition;
 
       if (childZoneUid) {
-        EventBus.$emit("dropped-on-child", childZoneUid);
+        EventBus.$emit(
+          "dropped-on-child",
+          targetIndex,
+          insertPosition,
+          childZoneUid
+        );
 
         this.emitItemEvent("drag-drop", targetEl);
         this.placeholder.remove();

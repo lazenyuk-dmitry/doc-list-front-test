@@ -24,8 +24,10 @@ function removeItem(array, index) {
   return arrCopy;
 }
 
-function getNewItemIndex(targetIndex, insertPosition) {
-  if (insertPosition === "before") {
+function getNewItemIndex(targetIndex, insertPosition, maxPosition) {
+  if (insertPosition === "append") {
+    return maxPosition + 1;
+  } else if (insertPosition === "before") {
     return targetIndex;
   } else if (insertPosition === "after") {
     return targetIndex + 1;
@@ -50,9 +52,12 @@ emitter.on("set-data-transfer", (originArray, item, index, zoneUid, group) => {
 });
 
 emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
-  const newPosition = getNewItemIndex(index, insertPosition);
+  const newPosition = getNewItemIndex(index, insertPosition, array.length);
 
-  if ((dataTransfer.group !== group, newPosition === dataTransfer.index)) {
+  if (
+    dataTransfer.group !== group ||
+    (newPosition === dataTransfer.index && zoneUid === dataTransfer.zoneUid)
+  ) {
     return;
   }
 
