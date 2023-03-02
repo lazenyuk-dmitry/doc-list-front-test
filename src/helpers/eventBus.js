@@ -28,7 +28,7 @@ function getNewItemIndex(targetIndex, insertPosition) {
   if (insertPosition === "before") {
     return targetIndex;
   } else if (insertPosition === "after") {
-    return targetIndex > dataTransfer.item ? targetIndex + 1 : targetIndex;
+    return targetIndex + 1;
   }
 
   return 0;
@@ -52,7 +52,7 @@ emitter.on("set-data-transfer", (originArray, item, index, zoneUid, group) => {
 emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
   const newPosition = getNewItemIndex(index, insertPosition);
 
-  if (dataTransfer.group !== group) {
+  if ((dataTransfer.group !== group, newPosition === dataTransfer.index)) {
     return;
   }
 
@@ -62,9 +62,11 @@ emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
 
   if (zoneUid === dataTransfer.zoneUid) {
     const modiFiedArray = removeItem(array, dataTransfer.index);
+    const correctNewPosition =
+      newPosition > dataTransfer.index ? newPosition - 1 : newPosition;
 
     emitChangedData(
-      addItem(modiFiedArray, dataTransfer.item, newPosition),
+      addItem(modiFiedArray, dataTransfer.item, correctNewPosition),
       zoneUid
     );
   } else {
