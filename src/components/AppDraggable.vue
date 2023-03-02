@@ -9,8 +9,8 @@
       :group="group"
       @start="dragStart($event)"
     >
-      <template #item="{ item }">
-        <slot name="item" :item="item" />
+      <template #item="{ item, uid }">
+        <slot name="item" :item="item" :uid="uid" />
       </template>
     </AppDraggableItem>
   </div>
@@ -68,6 +68,13 @@ export default {
 
     EventBus.$on("data-changed", ({ data, zoneUid }) => {
       if (this.zoneUid === zoneUid) {
+        const zoneEl = document.querySelector(`[data-drag-zone="${zoneUid}"]`);
+        const itemWrapEl = zoneEl.closest("[data-draggable-item]");
+
+        if (itemWrapEl) {
+          this.emitItemEvent("item-changed", itemWrapEl);
+        }
+
         this.$emit("update:data", data);
         this.$emit("end", data);
       }
@@ -113,6 +120,7 @@ export default {
       let targetIndex = null;
       let insertPosition = null;
       let dragZoneEl = null;
+      let targetEl = null;
       let childZoneGroup = null;
       let childZoneUid = null;
 
@@ -142,6 +150,7 @@ export default {
           childDragZoneEl &&
           intersectRect(ghostRect, itemRect)
         ) {
+          targetEl = item;
           targetIndex = index;
           insertPosition = "append";
           childZoneUid = parseInt(
@@ -155,7 +164,7 @@ export default {
         if (topOffset < this.maxOffset && topOffset > this.minOffset) {
           targetIndex = index;
           insertPosition = "before";
-          dragZoneEl = item;
+          targetEl = item;
 
           return;
         } else if (
@@ -164,19 +173,27 @@ export default {
         ) {
           targetIndex = index;
           insertPosition = "after";
-          dragZoneEl = item;
+          targetEl = item;
 
           return;
         }
       });
 
       return {
+        targetEl,
         targetIndex,
         insertPosition,
         dragZoneEl,
         childZoneGroup,
         childZoneUid,
       };
+    },
+    emitItemEvent(eventName, targetEl) {
+      const itemUid = targetEl
+        ? parseInt(targetEl.getAttribute("data-draggable-item"))
+        : null;
+
+      EventBus.$emit(eventName, itemUid);
     },
     emitDroppedEvent() {
       EventBus.$emit(
@@ -201,7 +218,7 @@ export default {
     move(event) {
       const target = event.target;
 
-      const { targetIndex, insertPosition, dragZoneEl } =
+      const { insertPosition, dragZoneEl, targetEl } =
         this.calcPosition(target);
 
       switch (insertPosition) {
@@ -210,11 +227,11 @@ export default {
           break;
 
         case "before":
-          dragZoneEl.before(this.placeholder);
+          targetEl.before(this.placeholder);
           break;
 
         case "after":
-          dragZoneEl.after(this.placeholder);
+          targetEl.after(this.placeholder);
           break;
 
         default:
@@ -222,11 +239,11 @@ export default {
           break;
       }
 
-      this.targetIndex = targetIndex;
+      this.emitItemEvent("drag-move", targetEl);
     },
     drop(event) {
       const target = event.target;
-      const { targetIndex, insertPosition, childZoneUid } =
+      const { targetIndex, targetEl, insertPosition, childZoneUid } =
         this.calcPosition(target);
 
       this.targetIndex = targetIndex;
@@ -234,11 +251,14 @@ export default {
 
       if (childZoneUid) {
         EventBus.$emit("dropped-on-child", childZoneUid);
+
+        this.emitItemEvent("drag-drop", targetEl);
         this.placeholder.remove();
 
         return;
       }
 
+      this.emitItemEvent("drag-drop", targetEl);
       this.emitDroppedEvent();
 
       this.placeholder.remove();
@@ -257,8 +277,11 @@ export default {
         ? childDragZoneEl.getAttribute("data-group")
         : null;
 
+      const isHidden = this.getDropZoneEl.closest("[data-hidden='true']");
+
       return (
         (ghostGroup === this.group || ghostGroup === childZoneGroup) &&
+        !isHidden &&
         intersectRect(ghostRect, zoneRect)
       );
     },

@@ -3,6 +3,7 @@
     ref="item"
     :class="{ [$style.clone]: isDragged }"
     :data-draggable-item="itemUid"
+    :data-draggable-group="group"
   >
     <slot name="item" :item="data" :uid="itemUid" />
   </div>

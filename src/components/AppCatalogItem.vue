@@ -1,11 +1,14 @@
 <template>
-  <div :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]">
+  <div
+    ref="item"
+    :class="[$style.root, { [$style.rootCollapsed]: isCollapsed }]"
+  >
     <div :class="setSectionClass">
       <AppButton
         v-if="isCollapsed"
         :class="[$style.sectionBtn, { [$style.collapse]: isCollapse }]"
         icon="chevronTo"
-        @click="toggleCollapse"
+        @click="toggleCollapse()"
       />
       <h3 :class="$style.itemTitle">{{ data.title }}</h3>
       <div v-if="data.marker.length" :class="$style.markers">
@@ -41,6 +44,7 @@
     <div
       ref="collapsed"
       :class="[$style.nestedItemsContainer, { [$style.collapse]: isCollapse }]"
+      :data-hidden="isCollapse"
     >
       <slot name="nested" />
     </div>
@@ -48,6 +52,7 @@
 </template>
 
 <script>
+import { nextTick } from "vue";
 import EventBus from "~helpers/eventBus";
 import AppButton from "~components/AppButton.vue";
 import AppDocMarker from "~components/AppDocMarker.vue";
@@ -83,8 +88,39 @@ export default {
     },
   },
   mounted() {
+    EventBus.$on("drag-move", (itemId) => {
+      if (itemId === this.dragItemUid) {
+        const ghostEl = document.querySelector("[data-ghost]");
+        const ghostGroup = ghostEl.getAttribute("data-ghost");
+        const itemEl = this.$refs.item;
+        const itemGroup = itemEl
+          .closest("[data-draggable-group]")
+          .getAttribute("data-draggable-group");
+
+        if (this.isCollapse && ghostGroup !== itemGroup) {
+          this.toggleCollapse();
+        } else {
+          nextTick(() => {
+            this.updCollapsedHeight();
+          });
+        }
+      }
+    });
+
+    EventBus.$on("drag-drop", (itemId) => {
+      if (itemId === this.dragItemUid) {
+        nextTick(() => {
+          this.updCollapsedHeight();
+        });
+      }
+    });
+
     EventBus.$on("item-changed", (itemId) => {
-      console.log(itemId, this.dragItemUid);
+      if (itemId === this.dragItemUid && !this.isCollapse) {
+        nextTick(() => {
+          this.updCollapsedHeight();
+        });
+      }
     });
   },
   methods: {
@@ -96,13 +132,14 @@ export default {
       if (maxHeight > 0) {
         collapsedEl.style.maxHeight = `${maxHeight - this.collapseStep}px`;
         this.animationId = requestAnimationFrame(
-          this.collapseDown.bind(null, collapsedEl)
+          this.collapseDown.bind(this, collapsedEl)
         );
       } else {
         collapsedEl.style.display = "none";
       }
     },
     collapseUp(collapsedEl, targetHeight) {
+      const calcTargetHeight = collapsedEl.scrollHeight;
       const maxHeight = collapsedEl.style.maxHeight
         ? parseInt(collapsedEl.style.maxHeight)
         : 0;
@@ -110,31 +147,31 @@ export default {
       if (maxHeight < targetHeight) {
         collapsedEl.style.maxHeight = `${maxHeight + this.collapseStep}px`;
         this.animationId = requestAnimationFrame(
-          this.collapseUp.bind(null, collapsedEl, targetHeight)
+          this.collapseUp.bind(this, collapsedEl, calcTargetHeight)
         );
       }
     },
-    toggleCollapse() {
+    updCollapsedHeight() {
+      this.toggleCollapse(true);
+    },
+    toggleCollapse(isUpd) {
       const collapsedEl = this.$refs.collapsed;
 
       collapsedEl.style.display = "block";
 
       const targetHeight = collapsedEl.scrollHeight;
-      const maxHeight = collapsedEl.style.maxHeight
-        ? parseInt(collapsedEl.style.maxHeight)
-        : 0;
 
       cancelAnimationFrame(this.animationId);
 
-      if (maxHeight) {
+      if (!this.isCollapse && !isUpd) {
         this.animationId = requestAnimationFrame(
-          this.collapseDown.bind(null, collapsedEl, targetHeight)
+          this.collapseDown.bind(this, collapsedEl)
         );
 
         this.isCollapse = true;
       } else {
         this.animationId = requestAnimationFrame(
-          this.collapseUp.bind(null, collapsedEl, targetHeight)
+          this.collapseUp.bind(this, collapsedEl, targetHeight)
         );
 
         this.isCollapse = false;
