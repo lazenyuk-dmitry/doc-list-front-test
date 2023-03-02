@@ -1,5 +1,10 @@
 <template>
-  <div ref="dropZone" :data-drag-zone="zoneUid" :data-group="group">
+  <div
+    ref="dropZone"
+    :data-drag-zone="zoneUid"
+    :data-group="group"
+    v-bind="$attrs"
+  >
     <AppDraggableItem
       v-for="(item, index) in rawData"
       :key="item.id"
@@ -108,6 +113,15 @@ export default {
     },
   },
   methods: {
+    removePlaceholders() {
+      const allPlaceholders = document.querySelector(
+        "." + this.placeholder.className
+      );
+
+      if (allPlaceholders) {
+        allPlaceholders.remove();
+      }
+    },
     calcPosition(target) {
       const targetGroup = target.getAttribute("data-group");
       const ghostEl = document.querySelector("[data-ghost]");
@@ -125,6 +139,16 @@ export default {
       const zoneChild = [...target.children].filter(
         (item) => item !== this.placeholder
       );
+
+      // If empty zone
+      if (
+        !zoneChild.length &&
+        intersectRect(ghostRect, target.getBoundingClientRect())
+      ) {
+        targetIndex = 0;
+        insertPosition = "append";
+        dragZoneEl = target;
+      }
 
       zoneChild.forEach((item, index) => {
         const itemRect = item.getBoundingClientRect();
@@ -155,7 +179,6 @@ export default {
             childDragZoneEl.getAttribute("data-drag-zone")
           );
           dragZoneEl = childDragZoneEl;
-
           return;
         }
 
@@ -217,15 +240,12 @@ export default {
       );
     },
     insertPlaceholder(target) {
-      const allPlaceholders = document.querySelector(
-        "." + this.placeholder.className
-      );
       const { insertPosition, dragZoneEl, targetEl } =
         this.calcPosition(target);
 
-      if (allPlaceholders) {
-        allPlaceholders.remove();
-      }
+      this.removePlaceholders();
+
+      console.log(insertPosition, dragZoneEl, targetEl);
 
       switch (insertPosition) {
         case "append":
@@ -241,7 +261,7 @@ export default {
           break;
 
         default:
-          this.placeholder.remove();
+          this.removePlaceholders();
           break;
       }
 
@@ -277,16 +297,16 @@ export default {
         return;
       }
 
-      if (targetEl && insertPosition) {
+      if (insertPosition) {
         this.emitDroppedEvent();
       }
 
       this.emitItemEvent("drag-drop", targetEl);
 
-      this.placeholder.remove();
+      this.removePlaceholders();
     },
     dragleave() {
-      this.placeholder.remove();
+      this.removePlaceholders();
     },
     checker() {
       const ghostEl = document.querySelector("[data-ghost]");

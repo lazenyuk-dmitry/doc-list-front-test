@@ -56,12 +56,11 @@ emitter.on("dropped", (array, index, insertPosition, zoneUid, group) => {
 
   if (
     dataTransfer.group !== group ||
-    (newPosition === dataTransfer.index && zoneUid === dataTransfer.zoneUid)
+    (newPosition === dataTransfer.index &&
+      zoneUid === dataTransfer.zoneUid &&
+      index === dataTransfer.index &&
+      zoneUid === dataTransfer.zoneUid)
   ) {
-    return;
-  }
-
-  if (index === dataTransfer.index && zoneUid === dataTransfer.zoneUid) {
     return;
   }
 

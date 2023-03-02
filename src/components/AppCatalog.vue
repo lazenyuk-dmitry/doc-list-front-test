@@ -18,8 +18,8 @@
               group="nested"
               @end="updSortedDocs(sortedDocs)"
             >
-              <template #item="{ item }">
-                <AppCatalogItem :data="item" />
+              <template #item="{ item, uid }">
+                <AppCatalogItem :data="item" :dragItemUid="uid" />
               </template>
             </AppDraggable>
           </template>
@@ -30,11 +30,13 @@
     <div :class="$style.unsorted">
       <AppDraggable
         v-model:data="unsortedDocs"
+        :class="$style.unsortedDraggable"
         handle="[data-draggable]"
         group="nested"
+        empty-placeholder
       >
-        <template #item="{ item }">
-          <AppCatalogItem :data="item" />
+        <template #item="{ item, uid }">
+          <AppCatalogItem :data="item" :dragItemUid="uid" />
         </template>
       </AppDraggable>
     </div>
@@ -96,5 +98,15 @@ export default {
 
 .unsorted {
   margin-top: 20px;
+}
+
+.unsortedDraggable {
+  min-height: 50px;
+  transition: 0.6s;
+
+  &:empty {
+    background-color: #ccc;
+    transition: 0.6s;
+  }
 }
 </style>
