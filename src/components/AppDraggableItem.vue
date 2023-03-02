@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { nextTick } from "vue";
 import interact from "interactjs";
 import EventBus from "~helpers/eventBus";
 
@@ -89,7 +90,11 @@ export default {
 
       this.isDragged = true;
 
-      this.$emit("start", this.componentData);
+      nextTick(() => {
+        EventBus.$emit("drag-start", this.itemUid);
+
+        this.$emit("start", this.componentData);
+      });
     },
     move(event) {
       if (this.ghost) {
@@ -105,7 +110,10 @@ export default {
 
       this.isDragged = false;
 
-      this.$emit("end", this.componentData);
+      nextTick(() => {
+        EventBus.$emit("drag-stop", this.itemUid);
+        this.$emit("end", this.componentData);
+      });
     },
   },
 };

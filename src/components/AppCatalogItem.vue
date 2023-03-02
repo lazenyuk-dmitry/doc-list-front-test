@@ -28,14 +28,7 @@
         <button :class="$style.actionButton" type="button">
           <AppIcon icon="trash" />
         </button>
-        <button
-          :class="$style.actionButton"
-          type="button"
-          data-draggable
-          @mousedown="isDragged = true"
-          @mouseout="isDragged = false"
-          @mouseup="isDragged = false"
-        >
+        <button :class="$style.actionButton" type="button" data-draggable>
           <AppIcon v-if="isDragged" icon="doubleVertArrowBlue" />
           <AppIcon v-else icon="doubleVertArrow" />
         </button>
@@ -101,7 +94,6 @@ export default {
         }
       }
     });
-
     EventBus.$on("drag-drop", (itemId) => {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
@@ -113,12 +105,21 @@ export default {
         }
       }
     });
-
     EventBus.$on("item-changed", (itemId) => {
       if (itemId === this.dragItemUid && !this.isCollapse) {
         nextTick(() => {
           this.updCollapsedHeight();
         });
+      }
+    });
+    EventBus.$on("drag-start", (itemUid) => {
+      if (this.dragItemUid === itemUid) {
+        this.dragStart();
+      }
+    });
+    EventBus.$on("drag-stop", (itemUid) => {
+      if (this.dragItemUid === itemUid) {
+        this.dragStop();
       }
     });
   },
@@ -135,6 +136,31 @@ export default {
         ghostGroup,
         itemGroup,
       };
+    },
+    dragStart() {
+      const ghostItemEl = document.querySelector(
+        "body > [data-draggable-item]"
+      );
+      const ghostRootEl = ghostItemEl.querySelector("." + this.$style.root);
+      const sectionButton = ghostItemEl.querySelector(
+        "." + this.$style.sectionBtn
+      );
+      const collapsedEl = ghostItemEl.querySelector("[data-hidden]");
+
+      if (!this.isCollapse) {
+        collapsedEl.style.maxHeight = null;
+
+        const rootRect = ghostRootEl.getBoundingClientRect();
+
+        ghostItemEl.style.width = rootRect.width + "px";
+        ghostItemEl.style.height = rootRect.height + "px";
+        sectionButton.classList.add(this.$style.collapse);
+      }
+
+      this.isDragged = true;
+    },
+    dragStop() {
+      this.isDragged = false;
     },
     collapseDown(collapsedEl) {
       const maxHeight = collapsedEl.style.maxHeight
