@@ -90,16 +90,11 @@ export default {
   mounted() {
     EventBus.$on("drag-move", (itemId) => {
       if (itemId === this.dragItemUid) {
-        const ghostEl = document.querySelector("[data-ghost]");
-        const ghostGroup = ghostEl.getAttribute("data-ghost");
-        const itemEl = this.$refs.item;
-        const itemGroup = itemEl
-          .closest("[data-draggable-group]")
-          .getAttribute("data-draggable-group");
+        const { ghostGroup, itemGroup } = this.cetGroups();
 
         if (this.isCollapse && ghostGroup !== itemGroup) {
           this.toggleCollapse();
-        } else {
+        } else if (!this.isCollapse) {
           nextTick(() => {
             this.updCollapsedHeight();
           });
@@ -109,9 +104,13 @@ export default {
 
     EventBus.$on("drag-drop", (itemId) => {
       if (itemId === this.dragItemUid) {
-        nextTick(() => {
-          this.updCollapsedHeight();
-        });
+        const { ghostGroup, itemGroup } = this.cetGroups();
+
+        if (ghostGroup !== itemGroup) {
+          nextTick(() => {
+            this.updCollapsedHeight();
+          });
+        }
       }
     });
 
@@ -124,6 +123,19 @@ export default {
     });
   },
   methods: {
+    cetGroups() {
+      const ghostEl = document.querySelector("[data-ghost]");
+      const ghostGroup = ghostEl.getAttribute("data-ghost");
+      const itemEl = this.$refs.item;
+      const itemGroup = itemEl
+        .closest("[data-draggable-group]")
+        .getAttribute("data-draggable-group");
+
+      return {
+        ghostGroup,
+        itemGroup,
+      };
+    },
     collapseDown(collapsedEl) {
       const maxHeight = collapsedEl.style.maxHeight
         ? parseInt(collapsedEl.style.maxHeight)

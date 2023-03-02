@@ -28,7 +28,7 @@ function getNewItemIndex(targetIndex, insertPosition) {
   if (insertPosition === "before") {
     return targetIndex;
   } else if (insertPosition === "after") {
-    return targetIndex + 1;
+    return targetIndex > dataTransfer.item ? targetIndex + 1 : targetIndex;
   }
 
   return 0;

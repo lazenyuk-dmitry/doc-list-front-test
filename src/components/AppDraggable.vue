@@ -246,6 +246,8 @@ export default {
       const { targetIndex, targetEl, insertPosition, childZoneUid } =
         this.calcPosition(target);
 
+      console.log(this.calcPosition(target));
+
       this.targetIndex = targetIndex;
       this.insertPosition = insertPosition;
 
@@ -258,8 +260,11 @@ export default {
         return;
       }
 
+      if (targetEl && insertPosition) {
+        this.emitDroppedEvent();
+      }
+
       this.emitItemEvent("drag-drop", targetEl);
-      this.emitDroppedEvent();
 
       this.placeholder.remove();
     },
