@@ -28,8 +28,10 @@
 import interact from "interactjs";
 import { toRaw } from "vue";
 
-import EventBus from "~helpers/eventBus";
+import DropZoneBus from "~helpers/dropZoneBus";
+import DragItemBus from "~helpers/dropZoneBus";
 import { intersectRect } from "~helpers";
+import { INSERT_POSITION } from "~constants";
 import AppDraggableItem from "~components/AppDraggableItem.vue";
 
 export default {
@@ -73,13 +75,13 @@ export default {
 
     this.placeholder.classList.add(this.$style.placeholder);
 
-    const a = interact(this.getDropZoneEl).dropzone({
+    interact(this.getDropZoneEl).dropzone({
       overlap: 0.8,
       listeners,
       checker: this.checker,
     });
 
-    EventBus.$on("data-changed", ({ data, zoneUid }) => {
+    DropZoneBus.$on("data-changed", ({ data, zoneUid }) => {
       if (this.zoneUid === zoneUid) {
         const zoneEl = document.querySelector(`[data-drag-zone="${zoneUid}"]`);
         const itemWrapEl = zoneEl.closest("[data-draggable-item]");
@@ -93,11 +95,19 @@ export default {
       }
     });
 
-    EventBus.$on("dropped-on-child", (targetIndex, insertPosition, zoneUid) => {
-      if (this.zoneUid === zoneUid) {
-        this.emitDroppedEvent(targetIndex, insertPosition);
+    DropZoneBus.$on(
+      "dropped-on-child",
+      (targetIndex, insertPosition, zoneUid) => {
+        if (this.zoneUid === zoneUid) {
+          this.emitDroppedEvent(targetIndex, insertPosition);
+        }
       }
-    });
+    );
+  },
+  unmounted() {
+    interact(this.getDropZoneEl);
+    DropZoneBus.$off("data-changed");
+    DropZoneBus.$off("dropped-on-child");
   },
   computed: {
     getDropZoneEl() {
@@ -140,7 +150,6 @@ export default {
       return index !== -1 ? index : null;
     },
     calcPosition(target) {
-      const targetGroup = target.getAttribute("data-group");
       const ghostEl = document.querySelector("body > [data-ghost]");
       const ghostUid = parseInt(ghostEl.getAttribute("data-draggable-item"));
       const ghostGroup = ghostEl.getAttribute("data-ghost");
@@ -163,7 +172,7 @@ export default {
         intersectRect(ghostRect, target.getBoundingClientRect())
       ) {
         targetIndex = 0;
-        insertPosition = "append";
+        insertPosition = INSERT_POSITION.APPEND;
         dragZoneEl = target;
       }
 
@@ -191,7 +200,7 @@ export default {
         ) {
           targetEl = item;
           targetIndex = index;
-          insertPosition = "append";
+          insertPosition = INSERT_POSITION.APPEND;
           childZoneUid = parseInt(
             childDragZoneEl.getAttribute("data-drag-zone")
           );
@@ -201,7 +210,7 @@ export default {
 
         if (topOffset < this.maxOffset && topOffset > this.minOffset) {
           targetIndex = index;
-          insertPosition = "before";
+          insertPosition = INSERT_POSITION.BEFORE;
           targetEl = item;
 
           return;
@@ -210,7 +219,7 @@ export default {
           bottomOffset > this.minOffset
         ) {
           targetIndex = index;
-          insertPosition = "after";
+          insertPosition = INSERT_POSITION.AFTER;
           targetEl = item;
 
           return;
@@ -231,13 +240,13 @@ export default {
         ? parseInt(targetEl.getAttribute("data-draggable-item"))
         : null;
 
-      EventBus.$emit(eventName, itemUid);
+      DragItemBus.$emit(eventName, itemUid);
     },
     emitDroppedEvent(
       targetIndex = this.targetIndex,
       insertPosition = this.insertPosition
     ) {
-      EventBus.$emit(
+      DropZoneBus.$emit(
         "dropped",
         this.rawData,
         targetIndex,
@@ -247,7 +256,7 @@ export default {
       );
     },
     dragStart(data) {
-      EventBus.$emit(
+      DropZoneBus.$emit(
         "set-data-transfer",
         this.rawData,
         data.data,
@@ -263,15 +272,15 @@ export default {
       this.removePlaceholders();
 
       switch (insertPosition) {
-        case "append":
+        case INSERT_POSITION.APPEND:
           dragZoneEl.append(this.placeholder);
           break;
 
-        case "before":
+        case INSERT_POSITION.BEFORE:
           targetEl.before(this.placeholder);
           break;
 
-        case "after":
+        case INSERT_POSITION.AFTER:
           targetEl.after(this.placeholder);
           break;
 
@@ -299,7 +308,7 @@ export default {
       this.insertPosition = insertPosition;
 
       if (childZoneUid) {
-        EventBus.$emit(
+        DropZoneBus.$emit(
           "dropped-on-child",
           targetIndex,
           insertPosition,

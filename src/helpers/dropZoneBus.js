@@ -1,4 +1,5 @@
 import emitter from "tiny-emitter/instance";
+import { INSERT_POSITION } from "~constants";
 
 const dataTransfer = {
   originArray: null,
@@ -25,12 +26,13 @@ function removeItem(array, index) {
 }
 
 function getNewItemIndex(targetIndex, insertPosition, maxPosition) {
-  if (insertPosition === "append") {
-    return maxPosition + 1;
-  } else if (insertPosition === "before") {
-    return targetIndex;
-  } else if (insertPosition === "after") {
-    return targetIndex + 1;
+  switch (insertPosition) {
+    case INSERT_POSITION.APPEND:
+      return maxPosition + 1;
+    case INSERT_POSITION.BEFORE:
+      return targetIndex;
+    case INSERT_POSITION.AFTER:
+      return targetIndex + 1;
   }
 
   return 0;

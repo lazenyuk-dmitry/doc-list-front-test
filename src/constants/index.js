@@ -11,3 +11,9 @@ export const DOCUMENT_MARKER = {
   BLUE: "#0066FF",
   L_BLUE: "#00C2FF",
 };
+
+export const INSERT_POSITION = {
+  APPEND: "append",
+  BEFORE: "before",
+  AFTER: "after",
+};

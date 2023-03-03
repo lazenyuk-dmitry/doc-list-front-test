@@ -12,7 +12,7 @@
 <script>
 import { nextTick } from "vue";
 import interact from "interactjs";
-import EventBus from "~helpers/eventBus";
+import DragItemBus from "~helpers/DragItemBus";
 
 export default {
   props: {
@@ -60,17 +60,14 @@ export default {
       end: this.end,
     };
 
-    const interactItem = interact(this.gerDraggableEl).draggable({
+    interact(this.gerDraggableEl).draggable({
       origin: "self",
       allowFrom: this.allowFrom,
       listeners,
     });
-
-    EventBus.$on("overlap", (itemUid) => {
-      if (itemUid === this.itemUid) {
-        this.$emit("overlap", this);
-      }
-    });
+  },
+  unmounted() {
+    interact(this.gerDraggableEl).unset();
   },
   methods: {
     start(event) {
@@ -91,7 +88,7 @@ export default {
       this.isDragged = true;
 
       nextTick(() => {
-        EventBus.$emit("drag-start", this.itemUid);
+        DragItemBus.$emit("drag-start", this.itemUid);
 
         this.$emit("start", this.componentData);
       });
@@ -111,7 +108,7 @@ export default {
       this.isDragged = false;
 
       nextTick(() => {
-        EventBus.$emit("drag-stop", this.itemUid);
+        DragItemBus.$emit("drag-stop", this.itemUid);
         this.$emit("end", this.componentData);
       });
     },

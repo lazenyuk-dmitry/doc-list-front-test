@@ -45,7 +45,7 @@
 
 <script>
 import { nextTick } from "vue";
-import EventBus from "~helpers/eventBus";
+import DragItemBus from "~helpers/dropZoneBus";
 import AppButton from "~components/AppButton.vue";
 import AppDocMarker from "~components/AppDocMarker.vue";
 import AppIcon from "~components/AppIcon.vue";
@@ -88,7 +88,7 @@ export default {
       this.toggleCollapse();
     }
 
-    EventBus.$on("drag-move", (itemId) => {
+    DragItemBus.$on("drag-move", (itemId) => {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
 
@@ -101,7 +101,7 @@ export default {
         }
       }
     });
-    EventBus.$on("drag-drop", (itemId) => {
+    DragItemBus.$on("drag-drop", (itemId) => {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
 
@@ -112,19 +112,19 @@ export default {
         }
       }
     });
-    EventBus.$on("item-changed", (itemId) => {
+    DragItemBus.$on("item-changed", (itemId) => {
       if (itemId === this.dragItemUid && !this.isCollapse) {
         nextTick(() => {
           this.updCollapsedHeight();
         });
       }
     });
-    EventBus.$on("drag-start", (itemUid) => {
+    DragItemBus.$on("drag-start", (itemUid) => {
       if (this.dragItemUid === itemUid) {
         this.dragStart();
       }
     });
-    EventBus.$on("drag-stop", (itemUid) => {
+    DragItemBus.$on("drag-stop", (itemUid) => {
       if (this.dragItemUid === itemUid) {
         this.dragStop();
       }
@@ -143,6 +143,13 @@ export default {
         ghostGroup,
         itemGroup,
       };
+    },
+    unmounted() {
+      DragItemBus.$off("drag-move");
+      DragItemBus.$off("drag-drop");
+      DragItemBus.$off("item-changed");
+      DragItemBus.$off("drag-start");
+      DragItemBus.$off("drag-stop");
     },
     dragStart() {
       const ghostItemEl = document.querySelector(
