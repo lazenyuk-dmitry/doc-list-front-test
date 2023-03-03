@@ -3,19 +3,8 @@ import AppIcon from "~components/AppIcon.vue";
 </script>
 
 <template>
-  <button
-    :class="[
-      $style.btn,
-      {
-        [$style.withIcon]: this.icon,
-        [$style.onlyIcon]: this.isOnlyIcon,
-        [$style.transparent]: this.transparent,
-      },
-    ]"
-    type="button"
-  >
+  <button :class="getCssClasses" type="button">
     <AppIcon :class="$style.icon" :icon="icon" />
-
     <slot />
   </button>
 </template>
@@ -40,6 +29,16 @@ export default {
   computed: {
     isOnlyIcon() {
       return !this.$slots.default;
+    },
+    getCssClasses() {
+      return [
+        this.$style.btn,
+        {
+          [this.$style.withIcon]: this.icon,
+          [this.$style.onlyIcon]: this.isOnlyIcon,
+          [this.$style.transparent]: this.transparent,
+        },
+      ];
     },
   },
 };

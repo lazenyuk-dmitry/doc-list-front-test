@@ -88,7 +88,21 @@ export default {
       this.toggleCollapse();
     }
 
-    DragItemBus.$on("drag-move", (itemId) => {
+    DragItemBus.$on("drag-move", this.onDragMove.bind(this));
+    DragItemBus.$on("drag-drop", this.onDragDrop.bind(this));
+    DragItemBus.$on("item-changed", this.onItemChanged.bind(this));
+    DragItemBus.$on("drag-start", this.onDragStart.bind(this));
+    DragItemBus.$on("drag-stop", this.onDragStop.bind(this));
+  },
+  unmounted() {
+    DragItemBus.$off("drag-move", this.onDragMove);
+    DragItemBus.$off("drag-drop", this.onDragDrop);
+    DragItemBus.$off("item-changed", this.onItemChanged);
+    DragItemBus.$off("drag-start", this.onDragStart);
+    DragItemBus.$off("drag-stop", this.onDragStop);
+  },
+  methods: {
+    onDragMove(itemId) {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
 
@@ -100,8 +114,8 @@ export default {
           });
         }
       }
-    });
-    DragItemBus.$on("drag-drop", (itemId) => {
+    },
+    onDragDrop(itemId) {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
 
@@ -111,26 +125,24 @@ export default {
           });
         }
       }
-    });
-    DragItemBus.$on("item-changed", (itemId) => {
+    },
+    onItemChanged(itemId) {
       if (itemId === this.dragItemUid && !this.isCollapse) {
         nextTick(() => {
           this.updCollapsedHeight();
         });
       }
-    });
-    DragItemBus.$on("drag-start", (itemUid) => {
+    },
+    onDragStart(itemUid) {
       if (this.dragItemUid === itemUid) {
         this.dragStart();
       }
-    });
-    DragItemBus.$on("drag-stop", (itemUid) => {
+    },
+    onDragStop(itemUid) {
       if (this.dragItemUid === itemUid) {
         this.dragStop();
       }
-    });
-  },
-  methods: {
+    },
     cetGroups() {
       const ghostEl = document.querySelector("[data-ghost]");
       const ghostGroup = ghostEl.getAttribute("data-ghost");
@@ -143,13 +155,6 @@ export default {
         ghostGroup,
         itemGroup,
       };
-    },
-    unmounted() {
-      DragItemBus.$off("drag-move");
-      DragItemBus.$off("drag-drop");
-      DragItemBus.$off("item-changed");
-      DragItemBus.$off("drag-start");
-      DragItemBus.$off("drag-stop");
     },
     dragStart() {
       const ghostItemEl = document.querySelector(

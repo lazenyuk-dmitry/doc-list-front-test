@@ -81,33 +81,13 @@ export default {
       checker: this.checker,
     });
 
-    DropZoneBus.$on("data-changed", ({ data, zoneUid }) => {
-      if (this.zoneUid === zoneUid) {
-        const zoneEl = document.querySelector(`[data-drag-zone="${zoneUid}"]`);
-        const itemWrapEl = zoneEl.closest("[data-draggable-item]");
-
-        if (itemWrapEl) {
-          this.emitItemEvent("item-changed", itemWrapEl);
-        }
-
-        this.$emit("update:data", data);
-        this.$emit("end", data);
-      }
-    });
-
-    DropZoneBus.$on(
-      "dropped-on-child",
-      (targetIndex, insertPosition, zoneUid) => {
-        if (this.zoneUid === zoneUid) {
-          this.emitDroppedEvent(targetIndex, insertPosition);
-        }
-      }
-    );
+    DropZoneBus.$on("data-changed", this.onDataChanged.bind(this));
+    DropZoneBus.$on("dropped-on-child", this.onDropOnChildZone.bind(this));
   },
   unmounted() {
     interact(this.getDropZoneEl);
-    DropZoneBus.$off("data-changed");
-    DropZoneBus.$off("dropped-on-child");
+    DropZoneBus.$off("data-changed", this.onDataChanged);
+    DropZoneBus.$off("dropped-on-child", this.onDropOnChildZone);
   },
   computed: {
     getDropZoneEl() {
@@ -135,6 +115,24 @@ export default {
     },
   },
   methods: {
+    onDataChanged({ data, zoneUid }) {
+      if (this.zoneUid === zoneUid) {
+        const zoneEl = document.querySelector(`[data-drag-zone="${zoneUid}"]`);
+        const itemWrapEl = zoneEl.closest("[data-draggable-item]");
+
+        if (itemWrapEl) {
+          this.emitItemEvent("item-changed", itemWrapEl);
+        }
+
+        this.$emit("update:data", data);
+        this.$emit("end", data);
+      }
+    },
+    onDropOnChildZone(targetIndex, insertPosition, zoneUid) {
+      if (this.zoneUid === zoneUid) {
+        this.emitDroppedEvent(targetIndex, insertPosition);
+      }
+    },
     removePlaceholders() {
       const allPlaceholders = document.querySelector(
         "." + this.placeholder.className
