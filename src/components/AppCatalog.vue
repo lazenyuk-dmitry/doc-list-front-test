@@ -10,6 +10,7 @@
           :data="item"
           :isCollapsed="item.type === sectionType"
           :dragItemUid="uid"
+          :openByDefault="item.id === 1"
         >
           <template #nested>
             <AppDraggable

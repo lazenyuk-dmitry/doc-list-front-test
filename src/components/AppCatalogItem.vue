@@ -66,6 +66,10 @@ export default {
       type: Number,
       required: false,
     },
+    openByDefault: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -81,6 +85,10 @@ export default {
     },
   },
   mounted() {
+    if (this.openByDefault && this.isCollapse) {
+      this.toggleCollapse();
+    }
+
     EventBus.$on("drag-move", (itemId) => {
       if (itemId === this.dragItemUid) {
         const { ghostGroup, itemGroup } = this.cetGroups();
