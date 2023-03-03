@@ -7,7 +7,7 @@
   >
     <TransitionGroup :name="$style.list">
       <AppDraggableItem
-        v-for="(item, index) in rawData"
+        v-for="(item, index) in getDataAfterSearch"
         :key="item.id"
         :data="item"
         :index="index"
@@ -45,6 +45,10 @@ export default {
     handle: {
       type: String || HTMLElement,
       default: "*",
+    },
+    searchFunction: {
+      type: Function,
+      required: false,
     },
   },
   data() {
@@ -103,6 +107,11 @@ export default {
     },
     oldArray() {
       return this.getOldArray;
+    },
+    getDataAfterSearch() {
+      return this.searchFunction
+        ? this.searchFunction(this.rawData)
+        : this.rawData;
     },
   },
   watch: {

@@ -10,7 +10,7 @@ import AppSearchInput from "~components/AppSearchInput.vue";
 
     <div class="container">
       <AppSearchInput :class="$style.searchInput" v-model="searchString" />
-      <AppCatalog />
+      <AppCatalog :searchString="searchString"/>
     </div>
   </main>
 </template>

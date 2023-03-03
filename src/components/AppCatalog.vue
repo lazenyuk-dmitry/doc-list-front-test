@@ -2,6 +2,7 @@
   <div :class="$style.root">
     <AppDraggable
       v-model:data="sortedDocs"
+      :searchFunction="search"
       handle="[data-draggable]"
       group="sorted"
     >
@@ -15,6 +16,7 @@
           <template #nested>
             <AppDraggable
               v-model:data="item.child"
+              :searchFunction="search"
               handle="[data-draggable]"
               group="nested"
               @end="updSortedDocs(sortedDocs)"
@@ -31,6 +33,7 @@
     <div :class="$style.unsorted">
       <AppDraggable
         v-model:data="unsortedDocs"
+        :searchFunction="search"
         :class="{ [$style.unsortedDraggable]: !unsortedDocs.length }"
         handle="[data-draggable]"
         group="nested"
@@ -54,6 +57,12 @@ import AppDraggable from "~components/AppDraggable.vue";
 
 export default {
   components: { AppCatalogItem, AppDraggable },
+  props: {
+    searchString: {
+      type: String,
+      required: false,
+    },
+  },
   computed: {
     ...mapGetters("documents", ["getSortedDocuments", "getUnsortedDocuments"]),
     unsortedDocs: {
@@ -88,6 +97,34 @@ export default {
       "updUnsortedDocs",
       "updSortedDocs",
     ]),
+
+    search(data) {
+      const search = data.filter((item) => {
+        return Object.entries(item).filter(([key, value]) => {
+          if (item.child && item.child.length) {
+            return item.child.filter((item) => {
+              return Object.entries(item).filter(([key, value]) => {
+                return this.filter(key, value);
+              }).length;
+            }).length;
+          }
+
+          return this.filter(key, value);
+        }).length;
+      });
+
+      return this.searchString ? search : data;
+    },
+
+    filter(key, value) {
+      if (["type", "id", "marker", "important"].includes(key)) {
+        return;
+      }
+
+      if (typeof value === "string") {
+        return value.toLowerCase().includes(this.searchString.toLowerCase());
+      }
+    },
   },
 };
 </script>
