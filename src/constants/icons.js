@@ -1,15 +1,37 @@
 export default {
-  plus: new URL("~icons/plus.svg", import.meta.url).href,
-  bookmark: new URL("~icons/bookmark.svg", import.meta.url).href,
-  chevronTo: new URL("~icons/chevron-top.svg", import.meta.url).href,
-  pen: new URL("~icons/pen.svg", import.meta.url).href,
-  trash: new URL("~icons/trash.svg", import.meta.url).href,
-  doubleVertArrow: new URL("~icons/double-vert-arrow.svg", import.meta.url)
-    .href,
-  doubleVertArrowBlue: new URL(
-    "~icons/double-vert-arrow__blue.svg",
-    import.meta.url
-  ).href,
-  search: new URL("~icons/search.svg", import.meta.url).href,
-  cross: new URL("~icons/cross.svg", import.meta.url).href,
+  plus: {
+    height: 14,
+    width: 14,
+  },
+  bookmark: {
+    height: 12,
+    width: 15,
+  },
+  chevronTop: {
+    height: 5,
+    with: 8,
+  },
+  pen: {
+    height: 14,
+    width: 14,
+  },
+  trash: {
+    height: 15,
+    width: 13,
+  },
+  doubleVertArrow: {
+    height: 16,
+    width: 8,
+    style: {
+      fill: "#8E9CBB",
+    },
+  },
+  search: {
+    height: 17,
+    width: 16,
+  },
+  cross: {
+    height: 12,
+    width: 12,
+  },
 };

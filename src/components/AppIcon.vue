@@ -1,11 +1,12 @@
 <template>
-  <object
+  <svg
     :class="$style.icon"
-    :data="iconUrl"
-    type="image/svg+xml"
-    height="14px"
-    width="14px"
-  ></object>
+    :height="getSize.height"
+    :width="getSize.width"
+    v-bind="getStyle"
+  >
+    <use :href="iconUrl" />
+  </svg>
 </template>
 
 <script>
@@ -22,8 +23,19 @@ export default {
     },
   },
   computed: {
+    spriteUrl() {
+      return new URL(`@/assets/svg-sprite.svg`, import.meta.url).href;
+    },
     iconUrl() {
-      return ICONS[this.icon];
+      return `${this.spriteUrl}#${this.icon}`;
+    },
+    getSize() {
+      const { height, width } = ICONS[this.icon];
+
+      return { height, width };
+    },
+    getStyle() {
+      return ICONS[this.icon].style;
     },
   },
 };
@@ -31,6 +43,6 @@ export default {
 
 <style lang="scss" module>
 .icon {
-  pointer-events: none;
+  display: inline-block;
 }
 </style>

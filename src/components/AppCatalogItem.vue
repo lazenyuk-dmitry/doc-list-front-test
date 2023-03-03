@@ -7,7 +7,7 @@
       <AppButton
         v-if="isCollapsed"
         :class="[$style.sectionBtn, { [$style.collapse]: isCollapse }]"
-        icon="chevronTo"
+        icon="chevronTop"
         @click="toggleCollapse()"
       />
       <h3 :class="$style.itemTitle">{{ data.title }}</h3>
@@ -29,8 +29,7 @@
           <AppIcon icon="trash" />
         </button>
         <button :class="$style.actionButton" type="button" data-draggable>
-          <AppIcon v-if="isDragged" icon="doubleVertArrowBlue" />
-          <AppIcon v-else icon="doubleVertArrow" />
+          <AppIcon :class="$style.dragIcon" icon="doubleVertArrow" />
         </button>
       </div>
     </div>
@@ -153,6 +152,7 @@ export default {
       const sectionButton = ghostItemEl.querySelector(
         "." + this.$style.sectionBtn
       );
+      const dragButton = ghostItemEl.querySelector("[data-draggable]");
       const collapsedEl = ghostItemEl.querySelector("[data-hidden]");
 
       if (!this.isCollapse) {
@@ -165,6 +165,7 @@ export default {
         sectionButton.classList.add(this.$style.collapse);
       }
 
+      dragButton.classList.add(this.$style.active);
       this.isDragged = true;
     },
     dragStop() {
@@ -312,6 +313,17 @@ export default {
 .actionButtons {
   margin-left: auto;
   flex-shrink: 0;
+}
+
+.dragIcon {
+  transition: 0.3s;
+}
+
+.active {
+  .dragIcon {
+    fill: #0066ff;
+    transition: 0.3s;
+  }
 }
 
 .actionButton {

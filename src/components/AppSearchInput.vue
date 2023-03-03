@@ -13,13 +13,15 @@ import AppButton from "~components/AppButton.vue";
       type="text"
       @input="onInput($event)"
     />
-    <AppButton
-      v-if="modelValue"
-      :class="$style.clearBtn"
-      icon="cross"
-      transparent
-      @click="clearValue()"
-    />
+    <Transition name="fade">
+      <AppButton
+        v-if="modelValue"
+        :class="$style.clearBtn"
+        icon="cross"
+        transparent
+        @click="clearValue()"
+      />
+    </Transition>
   </label>
 </template>
 
