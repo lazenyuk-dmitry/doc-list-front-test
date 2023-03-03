@@ -34,7 +34,7 @@
       <AppDraggable
         v-model:data="unsortedDocs"
         :searchFunction="search"
-        :class="{ [$style.unsortedDraggable]: !unsortedDocs.length }"
+        :class="$style.unsortedDraggable"
         handle="[data-draggable]"
         group="nested"
         empty-placeholder

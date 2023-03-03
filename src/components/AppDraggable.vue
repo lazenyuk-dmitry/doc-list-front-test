@@ -1,6 +1,7 @@
 <template>
   <div
     ref="dropZone"
+    :class="$style.root"
     :data-drag-zone="zoneUid"
     :data-group="group"
     v-bind="$attrs"
@@ -346,6 +347,10 @@ export default {
 </script>
 
 <style lang="scss" module>
+.root {
+  min-height: 1px; // Fix for overlap calc.
+}
+
 .placeholder {
   height: 5px;
   background: $app-active-color;
