@@ -10,7 +10,7 @@
         v-for="(item, index) in getDataAfterSearch"
         :key="item.id"
         :data="item"
-        :index="index"
+        :index="findItemIndex(item) || index"
         :allowFrom="handle"
         :group="group"
         @start="dragStart($event)"
@@ -132,6 +132,11 @@ export default {
       if (allPlaceholders) {
         allPlaceholders.remove();
       }
+    },
+    findItemIndex(item) {
+      const index = this.rawData.indexOf(item);
+
+      return index !== -1 ? index : null;
     },
     calcPosition(target) {
       const targetGroup = target.getAttribute("data-group");
@@ -289,7 +294,7 @@ export default {
       const { targetIndex, targetEl, insertPosition, childZoneUid } =
         this.calcPosition(target);
 
-      this.targetIndex = targetIndex;
+      this.targetIndex = this.findItemIndex(this.rawData[targetIndex]);
       this.insertPosition = insertPosition;
 
       if (childZoneUid) {
