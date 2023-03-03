@@ -30,7 +30,7 @@
     <div :class="$style.unsorted">
       <AppDraggable
         v-model:data="unsortedDocs"
-        :class="$style.unsortedDraggable"
+        :class="{ [$style.unsortedDraggable]: !unsortedDocs.length }"
         handle="[data-draggable]"
         group="nested"
         empty-placeholder

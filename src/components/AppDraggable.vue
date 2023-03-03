@@ -5,19 +5,21 @@
     :data-group="group"
     v-bind="$attrs"
   >
-    <AppDraggableItem
-      v-for="(item, index) in rawData"
-      :key="item.id"
-      :data="item"
-      :index="index"
-      :allowFrom="handle"
-      :group="group"
-      @start="dragStart($event)"
-    >
-      <template #item="{ item, uid }">
-        <slot name="item" :item="item" :uid="uid" />
-      </template>
-    </AppDraggableItem>
+    <TransitionGroup :name="$style.list">
+      <AppDraggableItem
+        v-for="(item, index) in rawData"
+        :key="item.id"
+        :data="item"
+        :index="index"
+        :allowFrom="handle"
+        :group="group"
+        @start="dragStart($event)"
+      >
+        <template #item="{ item, uid }">
+          <slot name="item" :item="item" :uid="uid" />
+        </template>
+      </AppDraggableItem>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -124,7 +126,7 @@ export default {
     },
     calcPosition(target) {
       const targetGroup = target.getAttribute("data-group");
-      const ghostEl = document.querySelector("[data-ghost]");
+      const ghostEl = document.querySelector("body > [data-ghost]");
       const ghostUid = parseInt(ghostEl.getAttribute("data-draggable-item"));
       const ghostGroup = ghostEl.getAttribute("data-ghost");
       const ghostRect = ghostEl.getBoundingClientRect();
@@ -245,8 +247,6 @@ export default {
 
       this.removePlaceholders();
 
-      console.log(insertPosition, dragZoneEl, targetEl);
-
       switch (insertPosition) {
         case "append":
           dragZoneEl.append(this.placeholder);
@@ -336,5 +336,22 @@ export default {
   height: 5px;
   background: #0066ff;
   margin: 0;
+}
+
+.list {
+  &:global(-move),
+  &:global(-leave-active),
+  &:global(-enter-active) {
+    transition: all 0.5s ease;
+  }
+
+  &:global(-enter-from),
+  &:global(-leave-to) {
+    opacity: 0;
+  }
+
+  &:global(-leave-active) {
+    position: absolute;
+  }
 }
 </style>
