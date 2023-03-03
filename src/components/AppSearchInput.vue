@@ -76,7 +76,7 @@ export default {
   display: block;
   width: 100%;
   border: none;
-  border-bottom: 1px solid #bfc9e0;
+  border-bottom: $app-input-underline;
   outline: none;
   padding: 15px 15px 15px 27px;
 
@@ -85,7 +85,7 @@ export default {
   font-style: italic;
 
   &:focus {
-    border-color: #0066ff;
+    border-color: $app-active-color;
   }
 }
 

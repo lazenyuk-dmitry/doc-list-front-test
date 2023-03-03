@@ -348,7 +348,7 @@ export default {
 <style lang="scss" module>
 .placeholder {
   height: 5px;
-  background: #0066ff;
+  background: $app-active-color;
   margin: 0;
 }
 

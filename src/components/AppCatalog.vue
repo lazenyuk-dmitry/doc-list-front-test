@@ -143,7 +143,7 @@ export default {
   transition: 0.6s;
 
   &:empty {
-    background-color: #ccc;
+    background-color: #f5f3f3;
     transition: 0.6s;
   }
 }

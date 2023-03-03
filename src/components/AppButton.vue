@@ -51,14 +51,14 @@ export default {
   justify-content: center;
   align-items: center;
   background: transparent;
-  border: 1px solid #d3d8df;
+  border: $app-btn-border;
   border-radius: 50px;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
   padding: 8px 20px;
   cursor: pointer;
-  transition: 0.6s;
+  transition: $app-btn-transition;
 
   &.withIcon {
     padding-left: 10px;
@@ -80,13 +80,13 @@ export default {
   }
 
   &:hover {
-    background-color: #d3d8df;
-    transition: 0.6s;
+    background-color: $app-btn-bg-hover;
+    transition: $app-btn-transition;
   }
 
   &:disabled {
     cursor: not-allowed;
-    transition: 0.6s;
+    transition: $app-btn-transition;
   }
 
   &.transparent {

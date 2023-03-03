@@ -236,8 +236,8 @@ export default {
 }
 
 %itemLine {
-  background: #ffffff;
-  border: 1px solid #dfe4ef;
+  background: $app-ban-color;
+  border: $app-list-item-border;
   min-height: 48px;
   padding: 16px 13px;
   display: flex;
@@ -281,7 +281,7 @@ export default {
 .importantText {
   font-weight: 400;
   font-size: 11px;
-  color: #ff238d;
+  color: $app-warn-color;
   margin: 0;
   margin-left: 15px;
 }
@@ -289,7 +289,7 @@ export default {
 .itemDesc {
   font-weight: 400;
   font-size: 11px;
-  color: #8e9cbb;
+  color: $app-light-color;
   margin: 0;
   margin-left: 15px;
   margin-right: 60px;
@@ -321,7 +321,7 @@ export default {
 
 .active {
   .dragIcon {
-    fill: #0066ff;
+    fill: $app-active-color;
     transition: 0.3s;
   }
 }

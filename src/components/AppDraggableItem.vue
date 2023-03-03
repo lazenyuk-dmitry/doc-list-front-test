@@ -121,7 +121,7 @@ export default {
 
 <style lang="scss" module>
 .ghost {
-  box-shadow: 0px 3px 16px rgba(0, 102, 255, 0.7);
+  box-shadow: $drag-ghost-shadow;
 }
 
 .clone {

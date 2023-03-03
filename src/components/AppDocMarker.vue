@@ -26,7 +26,7 @@ export default {
   height: 8px;
   padding: 0;
   border-radius: 50%;
-  background: #000000;
+  background: transparent;
   cursor: pointer;
   border: transparent;
   outline: transparent;
