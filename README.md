@@ -1,6 +1,8 @@
-# doc-list
+# Drag-and-drop demo
 
 This template should help get you started developing with Vue 3 in Vite.
+
+**[LIVE DEMO](https://lazenyuk-dmitry.github.io/doc-list-front-test/)**
 
 ## Recommended IDE Setup
 
