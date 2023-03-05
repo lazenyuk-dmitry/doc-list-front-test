@@ -9,6 +9,8 @@ This template should help get you started developing with Vue 3 in Vite.
 - Документы можно перемещать в категории, сортировать внутри категории и перетаскивать в категорию без сортировки.
 - Категории можно сортировать между собой.
 - Доступен поиск.
+  
+<br>
 
 - Lists of documents can be dragged by the arrow on the right side.
 - Categories can be collapsed and expanded.
