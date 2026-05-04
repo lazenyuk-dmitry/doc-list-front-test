@@ -1,6 +1,6 @@
 # Drag-and-drop demo
 
-This template should help get you started developing with Vue 3 in Vite.
+Тестовое задание: приложение для отображения и управления списком документов.
 
 **[LIVE DEMO](https://lazenyuk-dmitry.github.io/doc-list-front-test/)**
 
@@ -9,43 +9,35 @@ This template should help get you started developing with Vue 3 in Vite.
 - Документы можно перемещать в категории, сортировать внутри категории и перетаскивать в категорию без сортировки.
 - Категории можно сортировать между собой.
 - Доступен поиск.
-  
-<br>
 
-- Lists of documents can be dragged by the arrow on the right side.
-- Categories can be collapsed and expanded.
-- Documents can be moved into categories, sorted within a category, and dragged into a category without sorting.
-- Categories can be sorted among themselves.
-- Search available.
+---
 
-## Recommended IDE Setup
+![Main page](docs/images/main-page.png)
+
+## 🛠️ Стек технологий
+
+- Frontend: Vue / React (укажи что у тебя)
+- State management: (Pinia / Redux / Zustand — что используешь)
+- HTTP: Axios / Fetch
+- Сборка: Vite / Webpack
+- UI: (если есть — Tailwind / CSS / UI-kit)
+
+## Рекомендованные настройки IDE
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-## Customize configuration
+## 📦 Установка и запуск
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+```bash
+# Клонировать репозиторий
+git clone https://github.com/lazenyuk-dmitry/doc-list-front-test.git
 
-## Project Setup
+# Перейти в папку
+cd doc-list-front-test
 
-```sh
+# Установить зависимости
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Запустить dev сервер
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
 ```
